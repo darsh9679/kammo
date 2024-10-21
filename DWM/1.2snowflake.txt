@@ -1,0 +1,168 @@
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS FactSales;
+DROP TABLE IF EXISTS DimStore;
+DROP TABLE IF EXISTS DimCustomer;
+DROP TABLE IF EXISTS DimProduct;
+DROP TABLE IF EXISTS DimCategory;
+DROP TABLE IF EXISTS DimDate;
+DROP TABLE IF EXISTS DimRegion;
+
+-- Create the Dimension Tables
+
+-- Dimension Table: DimDate
+CREATE TABLE DimDate (
+    DateKey INT PRIMARY KEY,
+    Date DATE,
+    Month INT,
+    Year INT,
+    Quarter INT
+);
+
+-- Dimension Table: DimCategory
+CREATE TABLE DimCategory (
+    CategoryKey INT PRIMARY KEY,
+    CategoryName VARCHAR(50)
+);
+
+-- Dimension Table: DimProduct
+CREATE TABLE DimProduct (
+    ProductKey INT PRIMARY KEY,
+    ProductName VARCHAR(100),
+    Price DECIMAL(10, 2),
+    CategoryKey INT,
+    FOREIGN KEY (CategoryKey) REFERENCES DimCategory(CategoryKey)
+);
+
+-- Dimension Table: DimRegion
+CREATE TABLE DimRegion (
+    RegionKey INT PRIMARY KEY,
+    RegionName VARCHAR(50)
+);
+
+-- Dimension Table: DimCustomer
+CREATE TABLE DimCustomer (
+    CustomerKey INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(100),
+    City VARCHAR(50),
+    RegionKey INT,
+    FOREIGN KEY (RegionKey) REFERENCES DimRegion(RegionKey)
+);
+
+-- Dimension Table: DimStore
+CREATE TABLE DimStore (
+    StoreKey INT PRIMARY KEY,
+    StoreName VARCHAR(100),
+    Location VARCHAR(100)
+);
+
+-- Create the Fact Table
+
+-- Fact Table: FactSales
+CREATE TABLE FactSales (
+    SalesKey INT PRIMARY KEY,
+    DateKey INT,
+    ProductKey INT,
+    CustomerKey INT,
+    StoreKey INT,
+    QuantitySold INT,
+    TotalSales DECIMAL(10, 2),
+    FOREIGN KEY (DateKey) REFERENCES DimDate(DateKey),
+    FOREIGN KEY (ProductKey) REFERENCES DimProduct(ProductKey),
+    FOREIGN KEY (CustomerKey) REFERENCES DimCustomer(CustomerKey),
+    FOREIGN KEY (StoreKey) REFERENCES DimStore(StoreKey)
+);
+
+-- Insert Random Data into Dimension Tables
+
+-- Insert data into DimDate
+INSERT INTO DimDate (DateKey, Date, Month, Year, Quarter) VALUES
+(1, '2024-01-01', 1, 2024, 1),
+(2, '2024-01-02', 1, 2024, 1),
+(3, '2024-01-03', 1, 2024, 1),
+(4, '2024-01-04', 1, 2024, 1),
+(5, '2024-01-05', 1, 2024, 1);
+
+-- Insert data into DimCategory
+INSERT INTO DimCategory (CategoryKey, CategoryName) VALUES
+(1, 'Electronics'),
+(2, 'Accessories');
+
+-- Insert data into DimProduct
+INSERT INTO DimProduct (ProductKey, ProductName, Price, CategoryKey) VALUES
+(1, 'Laptop', 999.99, 1),
+(2, 'Smartphone', 599.99, 1),
+(3, 'Headphones', 79.99, 2),
+(4, 'Camera', 499.99, 1),
+(5, 'Smartwatch', 199.99, 2);
+
+-- Insert data into DimRegion
+INSERT INTO DimRegion (RegionKey, RegionName) VALUES
+(1, 'North America'),
+(2, 'Europe');
+
+-- Insert data into DimCustomer
+INSERT INTO DimCustomer (CustomerKey, FirstName, LastName, Email, City, RegionKey) VALUES
+(1, 'Alice', 'Johnson', 'alice.johnson@example.com', 'New York', 1),
+(2, 'Bob', 'Smith', 'bob.smith@example.com', 'London', 2),
+(3, 'Charlie', 'Brown', 'charlie.brown@example.com', 'Toronto', 1),
+(4, 'David', 'Williams', 'david.williams@example.com', 'Berlin', 2),
+(5, 'Eva', 'Davis', 'eva.davis@example.com', 'Los Angeles', 1);
+
+-- Insert data into DimStore
+INSERT INTO DimStore (StoreKey, StoreName, Location) VALUES
+(1, 'Electronics Store A', 'New York'),
+(2, 'Electronics Store B', 'London'),
+(3, 'Electronics Store C', 'Toronto'),
+(4, 'Electronics Store D', 'Berlin'),
+(5, 'Electronics Store E', 'Los Angeles');
+
+-- Insert Random Data into the Fact Table
+
+-- Insert data into FactSales
+INSERT INTO FactSales (SalesKey, DateKey, ProductKey, CustomerKey, StoreKey, QuantitySold, TotalSales) VALUES
+(1, 1, 1, 1, 1, 2, 1999.98),
+(2, 2, 2, 2, 2, 1, 599.99),
+(3, 3, 3, 3, 3, 3, 239.97),
+(4, 4, 4, 4, 4, 5, 2499.95),
+(5, 5, 5, 5, 5, 1, 199.99);
+
+-- Print all tables
+
+-- Print DimDate
+SELECT * FROM DimDate;
+
+-- Print DimCategory
+SELECT * FROM DimCategory;
+
+-- Print DimProduct
+SELECT * FROM DimProduct;
+
+-- Print DimRegion
+SELECT * FROM DimRegion;
+
+-- Print DimCustomer
+SELECT * FROM DimCustomer;
+
+-- Print DimStore
+SELECT * FROM DimStore;
+
+-- Print FactSales
+SELECT * FROM FactSales;
+
+-- Visualizing the Snowflake Schema
+
+-- A snowflake schema is characterized by normalized dimension tables.
+
+-- Here is a simple representation:
+
+-- FactSales
+-- |      |      |      |
+-- |      |      |      |
+-- DimDate DimProduct DimCustomer
+--                   |
+--                   |
+--                DimRegion
+--                   |                 
+--                DimCategory

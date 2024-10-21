@@ -1,0 +1,55 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, classification_report
+import numpy as np
+
+# Load the dataset from the specified file path
+file_path = r'C:\Users\ATHARVA\OneDrive\Desktop\weather.csv'
+data = pd.read_csv(file_path)
+
+# Print the column names to verify the correct structure
+print("Columns in dataset:", data.columns)
+
+# The target variable is 'Play'
+target_column = 'Play'
+
+# Convert the categorical features and target into numerical values using LabelEncoder
+X = data.drop(target_column, axis=1).apply(LabelEncoder().fit_transform)
+y = LabelEncoder().fit_transform(data[target_column])
+
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train a Categorical Naive Bayes model
+model = CategoricalNB().fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
+print(classification_report(y_test, y_pred))
+
+# Display the prediction results
+probs = model.predict_proba(X_test)
+events = pd.DataFrame({
+    'Actual': y_test, 
+    'Predicted': y_pred, 
+    'Prob(Play)': probs[:, 1], 
+    'Prob(No Play)': probs[:, 0]
+})
+print(events)
+
+# Display conditional probabilities for each feature value given the class
+for i, cls in enumerate(model.classes_):
+    print(f"\nClass {i}:")
+    for col_idx, col in enumerate(X.columns):
+        # Limit to the number of available feature values in the log probabilities
+        unique_values = np.unique(X.iloc[:, col_idx])
+        for value in unique_values:
+            if value < len(model.feature_log_prob_[col_idx]):  # Ensure the index is valid
+                print(f"P({value} | Class {i}) = {np.exp(model.feature_log_prob_[col_idx][value])}")
+            else:
+                print(f"P({value} | Class {i}) = No data available for this value")

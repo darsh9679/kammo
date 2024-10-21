@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Expanded sample data
+data = {
+    'Transaction': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'Milk': [True, True, False, True, False, True, True, False, True, True],
+    'Bread': [True, True, True, False, True, True, False, True, True, False],
+    'Butter': [False, True, True, True, False, True, False, True, False, True],
+    'Cheese': [False, False, True, True, True, True, False, False, True, True]
+}
+
+# Step 1: Load the sample data into a DataFrame
+df = pd.DataFrame(data)
+
+# Step 2: Take only the first 9 rows from the dataset (excluding Transaction)
+data = df.head(9)
+
+# Extracting the features and converting boolean to integer
+X = data[['Milk', 'Bread', 'Butter', 'Cheese']].astype(int).values
+
+# Step 3: Initialize centroids (randomly select k points from the dataset)
+def initialize_centroids(X, k):
+    np.random.seed(42)  # For reproducibility
+    centroids = X[np.random.choice(X.shape[0], k, replace=False)]
+    return centroids
+
+# Step 4: Assign clusters based on the closest centroid
+def assign_clusters(X, centroids):
+    clusters = []
+    for point in X:
+        distances = np.linalg.norm(point - centroids, axis=1)
+        cluster = np.argmin(distances)
+        clusters.append(cluster)
+    return np.array(clusters)
+
+# Step 5: Recompute the centroids as the mean of all points in each cluster
+def recompute_centroids(X, clusters, k):
+    centroids = []
+    for i in range(k):
+        cluster_points = X[clusters == i]
+        if len(cluster_points) > 0:
+            new_centroid = np.mean(cluster_points, axis=0)
+            centroids.append(new_centroid)
+    return np.array(centroids)
+
+# Step 6: KMeans algorithm
+def kmeans(X, k, max_iters=100):
+    centroids = initialize_centroids(X, k)
+    for iteration in range(max_iters):
+        print(f"Iteration {iteration + 1}")
+        
+        # Assign clusters
+        clusters = assign_clusters(X, centroids)
+
+        # Print current clusters and centroids
+        for i in range(k):
+            print(f"Centroid {i}: {centroids[i]}")
+            print(f"Points in Cluster {i}: {X[clusters == i]}")
+
+        # Recompute centroids
+        new_centroids = recompute_centroids(X, clusters, k)
+
+        # If centroids don't change, we have converged
+        if np.all(centroids == new_centroids):
+            print("Converged!")
+            break
+
+        centroids = new_centroids
+
+    return clusters, centroids
+
+# Step 7: Apply the KMeans algorithm
+k = 3  # Number of clusters
+clusters, final_centroids = kmeans(X, k)
+
+# Step 8: Plot the final clusters and centroids
+plt.scatter(X[:, 0], X[:, 1], c=clusters, cmap='viridis', label='Data Points')
+plt.scatter(final_centroids[:, 0], final_centroids[:, 1], s=300, c='red', marker='X', label='Centroids')
+plt.xlabel('Milk')
+plt.ylabel('Bread')
+plt.title('KMeans Clustering of Transactions')
+plt.legend()
+plt.grid()
+plt.show()

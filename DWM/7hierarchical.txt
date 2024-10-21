@@ -1,0 +1,23 @@
+#IMPLEMENTATION OF HIERARCHICAL CLUSTERING METHOD
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
+from scipy.spatial.distance import pdist
+# Generate sample data
+np.random.seed(42)
+data = np.random.rand(10, 2) # 10 samples with 2 features
+# Compute the distance matrix
+distance_matrix = pdist(data, 'euclidean')
+# Perform hierarchical clustering
+Z = linkage(distance_matrix, method='ward')
+# Create a dendrogram
+plt.figure(figsize=(10, 7))
+dendrogram(Z, labels=np.arange(1, len(data) + 1))
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('Sample index')
+plt.ylabel('Distance')
+plt.show()
+# Cut the dendrogram to form flat clusters
+max_d = 0.5 # Define the maximum distance for flat clustering
+clusters = fcluster(Z, max_d, criterion='distance')
+print("Cluster assignments:", clusters)

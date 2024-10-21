@@ -1,0 +1,55 @@
+import numpy as np
+
+def equifreq_binning(arr, num_bins):
+    """Perform equal frequency binning."""
+    sorted_arr = sorted(arr)
+    n = len(arr)
+    bin_size = int(np.ceil(n / num_bins))
+    return [sorted_arr[i:i + bin_size] for i in range(0, n, bin_size)]
+
+def bin_mean(bins):
+    """Smoothing by bin means."""
+    return [np.mean(bin) for bin in bins]
+
+def bin_median(bins):
+    """Smoothing by bin median."""
+    return [np.median(bin) for bin in bins]
+
+def bin_boundary(bins):
+    """Smoothing by bin boundaries."""
+    smoothed_bins = []
+    for bin in bins:
+        if bin:
+            min_val = min(bin)
+            max_val = max(bin)
+            smoothed_bins.append([min_val if abs(val - min_val) < abs(val - max_val) else max_val for val in bin])
+    return smoothed_bins
+
+# Data to be binned
+data = [4, 8, 9, 15, 21, 21, 24, 25, 26, 28, 29, 34]
+# Number of bins
+m = 3
+
+# Equal Frequency Binning
+bins = equifreq_binning(data, m)
+print("Equal Frequency Binning:")
+for i, bin in enumerate(bins):
+    print(f"Bin {i + 1}: {bin}")
+
+# Smoothing by Bin Mean
+mean_smoothed_bins = bin_mean(bins)
+print("\nSmoothing by Bin Mean:")
+for i, mean in enumerate(mean_smoothed_bins):
+    print(f"Bin {i + 1}: {mean}")
+
+# Smoothing by Bin Median
+median_smoothed_bins = bin_median(bins)
+print("\nSmoothing by Bin Median:")
+for i, median in enumerate(median_smoothed_bins):
+    print(f"Bin {i + 1}: {median}")
+
+# Smoothing by Bin Boundary
+boundary_smoothed_bins = bin_boundary(bins)
+print("\nSmoothing by Bin Boundary:")
+for i, smoothed_bin in enumerate(boundary_smoothed_bins):
+    print(f"Bin {i + 1}: {smoothed_bin}")
